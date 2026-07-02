@@ -1,0 +1,22 @@
+# OS / 编辑器
+.DS_Store
+**/.DS_Store
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+**/__pycache__/
+*.pyc
+
+# 机密
+.env
+*.env
+
+# RouterBench 原始数据 & 特征缓存（体积大，请自行下载/生成，见 README）
+data/peek.csv
+data/routerbench_0shot.pkl
+data/emb_cache.npz
+
+# Word 临时锁文件
+**/~$*
+
+# 第三方论文 PDF
+reading/*.pdf
