@@ -3,7 +3,8 @@
 
 data:
   csv_path: data/peek.csv
-  max_samples: 1000          # 提速上限; null 表示用全部
+  csv_encoding: auto        # auto | utf-8 | gb18030；peek.csv 含中文时常为 gb18030
+  max_samples: 1000          # 总样本; OOF 测试 query 数 = max_samples - initial_train (默认 900)
   shuffle: true              # peek.csv 按 eval_name 排序, 打乱后滚动切分才有代表性
   seed: 42
   success_threshold: 0.5     # 部分列是分数(0.25/0.5/0.75), >= 阈值算成功(1)
@@ -30,6 +31,9 @@ embedding:
 features:
   use_structural: true       # 拼接可解释手工特征（中文名）
   use_embedding: true        # 是否保留 bge / TF-IDF 语义特征
+  use_target_encoding: true    # 拼接"该模型在该 eval_name 上的历史成功率"(按折/贝叶斯平滑/不穿越)
+  target_encoding_alpha: 20.0  # 平滑强度: 样本少的 eval_name 向全局均值收缩
+  use_cross_difficulty: False   # 额外拼接: 跨模型难度 + 模型全局成功率
 
 split:
   mode: expanding            # expanding | sliding | single

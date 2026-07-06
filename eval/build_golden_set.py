@@ -125,7 +125,7 @@ def _prompt_text(raw: str) -> str:
 
 
 def main() -> None:
-    df = pd.read_csv(PEEK)
+    df = pd.read_csv(PEEK, encoding="gb18030")
     available = set(df["eval_name"].unique())
 
     evals_to_sample = []

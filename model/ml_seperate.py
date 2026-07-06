@@ -55,10 +55,24 @@ def _resolve(path: str | Path) -> Path:
     return (ROOT / path) if not Path(path).is_absolute() else Path(path)
 
 
+def _read_csv(path: Path, encoding: str | None = None) -> pd.DataFrame:
+    """读 CSV；encoding=None 时依次尝试 utf-8 / gb18030（peek.csv 常为后者）。"""
+    if encoding and encoding != "auto":
+        return pd.read_csv(path, encoding=encoding)
+    for enc in ("utf-8", "utf-8-sig", "gb18030", "gbk"):
+        try:
+            return pd.read_csv(path, encoding=enc)
+        except UnicodeDecodeError:
+            continue
+    logger.warning(f"CSV 编码 fallback latin-1: {path}")
+    return pd.read_csv(path, encoding="latin-1")
+
+
 def load_data(cfg: dict) -> Dataset:
     csv_path = _resolve(cfg["data"]["csv_path"])
     max_samples = cfg["data"].get("max_samples")
-    df = pd.read_csv(csv_path)
+    enc = cfg["data"].get("csv_encoding", "auto")
+    df = _read_csv(csv_path, encoding=enc)
     if cfg["data"].get("shuffle"):
         df = df.sample(frac=1.0, random_state=int(cfg["data"].get("seed", 42))).reset_index(drop=True)
     if max_samples:
@@ -585,6 +599,12 @@ def rolling_backtest(cfg: dict, featurizer: Featurizer, data: Dataset) -> pd.Dat
     holdout_frac = float(cal_cfg.get("holdout_frac", 0.3))
     seed = int(cfg["data"].get("seed", 42))
 
+    feat_cfg = cfg.get("features", {})
+    use_te = bool(feat_cfg.get("use_target_encoding", False))
+    te_alpha = float(feat_cfg.get("target_encoding_alpha", 10.0))
+    use_cross = bool(feat_cfg.get("use_cross_difficulty", False))
+    eval_names_arr = np.asarray(data.eval_names)
+
     rows: list[dict] = []
     folds = list(make_folds(len(data.prompts), cfg))
     logger.info(
@@ -606,22 +626,56 @@ def rolling_backtest(cfg: dict, featurizer: Featurizer, data: Dataset) -> pd.Dat
         else:
             X_proper, X_cal = X_train, X_train[:0]
 
+        # 跨模型难度: 该 eval_name 上所有模型的平均成功率(仅用 train_proper, 不穿越)
+        cross_map: dict = {}
+        cross_g = 0.0
+        if use_te and use_cross and len(train_proper):
+            cross_g = float(data.success[train_proper].mean())
+            dfc = pd.DataFrame(
+                {"e": eval_names_arr[train_proper], "y": data.success[train_proper].mean(axis=1)}
+            )
+            aggc = dfc.groupby("e")["y"].agg(["sum", "count"])
+            cross_map = ((aggc["sum"] + te_alpha * cross_g) / (aggc["count"] + te_alpha)).to_dict()
+
         for mi, model in enumerate(data.models):
             y_train = data.success[train_idx, mi]
             y_test = data.success[test_idx, mi]
             y_proper = data.success[train_proper, mi] if len(train_proper) else y_train
             y_cal = data.success[cal_idx, mi] if len(cal_idx) else np.array([])
 
+            # 历史成功率特征(仅用 train_proper 统计, 不穿越):
+            #   te_eval  = 该 model 在该 eval_name 上的历史成功率(贝叶斯平滑)
+            #   cross    = 该 eval_name 的跨模型平均成功率(任务难度先验)
+            #   mglobal  = 该 model 的训练集全局成功率(模型强弱先验)
+            Xp, Xc, Xt = X_proper, X_cal, X_test
+            if use_te and len(y_proper):
+                g = float(y_proper.mean())
+                dfe = pd.DataFrame({"e": eval_names_arr[train_proper], "y": y_proper})
+                agg = dfe.groupby("e")["y"].agg(["sum", "count"])
+                rate = ((agg["sum"] + te_alpha * g) / (agg["count"] + te_alpha)).to_dict()
+
+                def _cols(idxs: np.ndarray, _rate=rate, _g=g) -> np.ndarray:
+                    evs = eval_names_arr[idxs]
+                    feats = [[_rate.get(e, _g) for e in evs]]
+                    if use_cross:
+                        feats.append([cross_map.get(e, cross_g) for e in evs])
+                        feats.append([_g] * len(evs))  # mglobal(常数列, 帮助跨模型排序)
+                    return np.asarray(feats, dtype=np.float32).T
+
+                Xp = np.hstack([X_proper, _cols(train_proper)])
+                Xt = np.hstack([X_test, _cols(test_idx)])
+                Xc = np.hstack([X_cal, _cols(cal_idx)]) if len(cal_idx) else X_cal
+
             if len(np.unique(y_proper)) < 2:
                 p_raw = np.full(len(test_idx), float(y_proper.mean()) if len(y_proper) else 0.0)
                 p_cal = p_raw.copy()
             else:
                 clf = _new_predictor(cfg)
-                clf.fit(X_proper, y_proper)
-                p_raw = clf.predict_proba(X_test)[:, 1]
+                clf.fit(Xp, y_proper)
+                p_raw = clf.predict_proba(Xt)[:, 1]
 
                 if len(cal_idx) and len(np.unique(y_cal)) >= 2:
-                    p_cal_train = clf.predict_proba(X_cal)[:, 1]
+                    p_cal_train = clf.predict_proba(Xc)[:, 1]
                     calibrator = _fit_calibrator(cal_method, y_cal, p_cal_train)
                     p_cal = _apply_calibrator(calibrator, p_raw)
                 else:

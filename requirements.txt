@@ -18,5 +18,5 @@ sentence-transformers>=2.2
 tf-keras>=2.15          # 部分环境 transformers 导入需要, 避免 Keras3 冲突
 torch>=2.0              # sentence-transformers 后端
 
-# 可选: 免费替代 Gurobi 的求解器(本仓库默认用 Gurobi, 如需可自行切换)
-# ortools>=9.7
+# 可选: LLM-as-judge / agent 真实 API (--real 开关)
+# openai>=1.0

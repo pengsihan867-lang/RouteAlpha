@@ -6,8 +6,8 @@
 
 | judge | 位置翻转率 | 采纳率 | 采纳样本准确率 |
 |---|---|---|---|
-| 公平 judge (无偏置) | 0.0 | 1.0 | 1.0 |
-| 有位置偏置的 judge | 1.0 | 0.0 | None |
+| 公平 judge (mock) | 0.0 | 1.0 | 1.0 |
+| 有位置偏置 judge (mock) | 1.0 | 0.0 | None |
 
 ## 怎么读这张表
 
@@ -15,6 +15,14 @@
 - 有偏置的 judge 翻转率明显更高, 说明很多判定只是因为顺序不同而改变, 不可信。
 - **采纳率** = 两次一致、保留下来的比例; 翻转掉的判定被丢弃, 不进入训练标签 (防污染)。
 - **采纳样本准确率**: 在保留的判定里, judge 是否真的挑出了更好的答案。
+
+## 一键切换真实模型
+
+```bash
+export OPENAI_API_KEY=your_key
+# 可选: export OPENAI_BASE_URL=...  export JUDGE_MODEL=gpt-4o-mini
+python eval/judge.py --real
+```
 
 ## 结论
 

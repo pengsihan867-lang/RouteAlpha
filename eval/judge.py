@@ -191,43 +191,76 @@ def run_judge_eval(judge, pairs: list[dict]) -> dict:
 # ============================================================================ #
 # 第 5 步: 写一份小报告 (交付物), 顺便对比"公平 judge"和"有偏置 judge"
 # ============================================================================ #
-def write_report(fair: dict, biased: dict, out_path: Path) -> None:
+def write_report(fair: dict, biased: dict, out_path: Path, real: dict | None = None) -> None:
     lines = []
     lines.append("# LLM-as-a-Judge 偏置诊断报告\n")
     lines.append("> 由 `eval/judge.py` 生成。演示位置偏置如何被 swap-and-aggregate 发现。\n")
     lines.append("## 指标对比\n")
     lines.append("| judge | 位置翻转率 | 采纳率 | 采纳样本准确率 |")
     lines.append("|---|---|---|---|")
-    for name, res in [("公平 judge (无偏置)", fair), ("有位置偏置的 judge", biased)]:
+    for name, res in [("公平 judge (mock)", fair), ("有位置偏置 judge (mock)", biased)]:
         m = res["metrics"]
         lines.append(
             f"| {name} | {m['position_flip_rate']} | {m['accept_rate']} | {m['accuracy_on_accepted']} |"
+        )
+    if real is not None:
+        m = real["metrics"]
+        lines.append(
+            f"| 真实 LLM judge | {m['position_flip_rate']} | {m['accept_rate']} | {m['accuracy_on_accepted']} |"
         )
     lines.append("\n## 怎么读这张表\n")
     lines.append("- **位置翻转率越低越好**: 它衡量 judge 受答案顺序影响的程度。")
     lines.append("- 有偏置的 judge 翻转率明显更高, 说明很多判定只是因为顺序不同而改变, 不可信。")
     lines.append("- **采纳率** = 两次一致、保留下来的比例; 翻转掉的判定被丢弃, 不进入训练标签 (防污染)。")
     lines.append("- **采纳样本准确率**: 在保留的判定里, judge 是否真的挑出了更好的答案。\n")
+    lines.append("## 一键切换真实模型\n")
+    lines.append("```bash")
+    lines.append("export OPENAI_API_KEY=your_key")
+    lines.append("# 可选: export OPENAI_BASE_URL=...  export JUDGE_MODEL=gpt-4o-mini")
+    lines.append("python eval/judge.py --real")
+    lines.append("```\n")
     lines.append("## 结论\n")
     lines.append("swap-and-aggregate 能把受位置影响的判定识别并剔除, 是 LLM-judge 可信度的基础防线。\n")
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="LLM-as-a-judge 偏置诊断")
+    parser.add_argument(
+        "--real",
+        action="store_true",
+        help="用真实 LLM API 跑 swap-and-aggregate (需 OPENAI_API_KEY)",
+    )
+    args = parser.parse_args()
+
     pairs = DEMO_PAIRS
 
-    # 造两个 judge: 一个公平(bias=0), 一个明显偏向 A 位置(bias 很大)
+    # mock 演示: 公平 vs 有偏置
     fair_judge = make_mock_judge(position_bias=0.0, seed=42)
     biased_judge = make_mock_judge(position_bias=5.0, seed=42)
 
     fair = run_judge_eval(fair_judge, pairs)
     biased = run_judge_eval(biased_judge, pairs)
+    real = None
+
+    if args.real:
+        import os
+
+        if not os.environ.get("OPENAI_API_KEY"):
+            raise SystemExit("请设置 OPENAI_API_KEY (及可选 OPENAI_BASE_URL / JUDGE_MODEL)")
+        print("使用真实 LLM judge ...")
+        real = run_judge_eval(api_judge, pairs)
 
     # 终端打印
-    print("\n===== 公平 judge (无位置偏置) =====")
+    print("\n===== 公平 judge (mock) =====")
     print(fair["metrics"])
-    print("\n===== 有位置偏置的 judge =====")
+    print("\n===== 有位置偏置 judge (mock) =====")
     print(biased["metrics"])
+    if real is not None:
+        print("\n===== 真实 LLM judge =====")
+        print(real["metrics"])
 
     print("\n----- 有偏置 judge 的逐条明细 -----")
     print(f"{'第1次':<6}{'第2次':<6}{'是否一致':<8}问题")
@@ -237,7 +270,7 @@ def main() -> None:
 
     # 写报告
     out = ROOT / "eval" / "judge_report.md"
-    write_report(fair, biased, out)
+    write_report(fair, biased, out, real=real)
     print(f"\n报告已写入: {out}")
 
 
