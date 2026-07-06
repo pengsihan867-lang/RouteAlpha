@@ -1,13 +1,14 @@
-"""RouteAlpha M1/M2: 配置驱动的能力预测管线。
+"""RouteAlpha M1/M2: 配置驱动的能力预测管线.
 
-流程:
-  1. 读取 config.yaml + peek.csv
-  2. 每 model 独立 XGBoost: prompt → P(success)
-  3. 特征: bge-small (frozen, 无穿越) 或 TF-IDF (按折仅在 train 上 fit)
-  4. 扩张窗口 out-of-fold 回测 + 可选 Platt/Isotonic 校准
-  5. 指标: accuracy / AUC / Brier / ECE
+职责: 每 model 独立 XGBoost 预测 P(success), OOF 回测 + Isotonic 校准。
+输入: config.yaml, data/peek.csv
+输出: data/predictions.parquet, data/metrics.csv
 
-CLI:  python model/ml_seperate.py [config/config.yaml]
+数据纪律 (四分法):
+  train / calibration-holdout / test (OOF) / golden — golden 永不参与训练。
+  TF-IDF 按折仅在 train fit; 校准在 fold 内 holdout, 不在 test 上 fit。
+
+CLI: python model/ml_seperate.py [config/config.yaml]
 """
 
 from __future__ import annotations

@@ -16,6 +16,7 @@ data/routerbench_0shot.pkl
 data/emb_cache.npz
 data/exp_emb_*.npz
 data/*.parquet
+!data/iteration_log.csv
 
 # 可本地再生的小产物（可选保留 metrics.csv 在 git 外）
 # data/metrics.csv
@@ -24,6 +25,7 @@ data/*.parquet
 record/
 **/~$*
 *.docx
+!docs/实验记录.docx
 
 # 第三方论文 PDF
 reading/*.pdf

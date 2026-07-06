@@ -1,15 +1,17 @@
 """eval/failure_analysis.py — MILP 路由失败样本逐条归因 (badcase)
 
-把每条失败 query 归入设计文档 3.6 的五类之一:
-  task_hard          oracle 也失败 → 任务本身难, 非路由锅
-  prediction_error   预测排序错, 没选到更可能成功的模型
-  calibration_error  排序可能对, 但概率刻度误导了分配
-  budget_binding     预算紧, 被迫选便宜模型而失败
-  label_noise        边界/存疑 (概率接近、多模型结果矛盾)
+职责: 将 MILP 路由失败 query 归入五类归因标签, 产出汇总表与图表。
+输入: predictions.parquet 长表 (含 y_true, p_success, cost); 预算参数。
+输出: badcase DataFrame, 归因计数, metrics dict; 图写入 images/failure_attribution.png。
 
-用法:
-  python eval/failure_analysis.py
-  或在 test.ipynb 里 import analyze_routing_failures
+五类归因 (设计文档 3.6):
+  task_hard          oracle 也失败 → 任务本身难
+  prediction_error   预测排序错
+  calibration_error  概率刻度误导分配
+  budget_binding     预算紧被迫选便宜模型
+  label_noise        边界/存疑
+
+数据纪律: 归因用 y_true 评估真实成败, 不用预测值自嗨。
 """
 
 from __future__ import annotations
@@ -221,7 +223,8 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(6.5, 3.8))
     plot_failure_summary(summary, ax=ax)
     fig.tight_layout()
-    out_png = ROOT / "docs" / "failure_attribution.png"
+    out_png = ROOT / "images" / "failure_attribution.png"
+    out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=120, bbox_inches="tight")
     print("saved", out_png)
 

@@ -1,4 +1,8 @@
-"""Generate iteration_progress.png: Pareto baselines + v0→v2→v3 trajectory."""
+"""Generate pareto_iteration.png: Pareto baselines + v0→v2→v3 trajectory.
+
+输入: data/predictions_v{0,2}.parquet, data/predictions.parquet
+输出: images/pareto_iteration.png
+"""
 
 from __future__ import annotations
 
@@ -18,7 +22,7 @@ from model import milp as mp  # noqa: E402
 from model import ml_seperate as ml  # noqa: E402
 
 DEMO_BUDGET = 0.001
-OUT = ROOT / "docs" / "iteration_progress.png"
+OUT = ROOT / "images" / "pareto_iteration.png"
 
 VERSIONS = [
     ("v0", "v0_baseline", ROOT / "data" / "predictions_v0.parquet", "#9e9e9e"),

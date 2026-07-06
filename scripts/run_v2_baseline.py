@@ -1,4 +1,8 @@
-"""Run v2 (TE only, alpha=10) and append to iteration_log.csv."""
+"""Run v2 (TE only, alpha=10) and append to iteration_log.csv.
+
+输入: config/config.yaml, data/peek.csv
+输出: data/predictions_v2.parquet, data/iteration_log.csv 一行
+"""
 
 from __future__ import annotations
 

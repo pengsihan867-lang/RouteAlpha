@@ -1,5 +1,8 @@
 """Generate golden_set.json v1 from RouterBench peek.csv (stratified sample).
-读取golden_set.json
+
+职责: 从 peek.csv 分层抽样, 生成 versioned golden set (48 条)。
+输入: data/peek.csv
+输出: eval/golden_set.json (held-out, 不参与训练)
 """
 
 from __future__ import annotations

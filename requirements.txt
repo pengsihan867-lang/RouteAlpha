@@ -18,5 +18,4 @@ sentence-transformers>=2.2
 tf-keras>=2.15          # 部分环境 transformers 导入需要, 避免 Keras3 冲突
 torch>=2.0              # sentence-transformers 后端
 
-# 可选: LLM-as-judge / agent 真实 API (--real 开关)
-# openai>=1.0
+python-docx>=1.1.0       # scripts/generate_experiment_record.py

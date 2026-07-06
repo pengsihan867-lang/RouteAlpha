@@ -1,21 +1,10 @@
-"""RouteAlpha M3: 预算约束下的路由求解 (Gurobi)。
+"""RouteAlpha M3: 预算约束下的路由求解 (Gurobi).
 
-输入: ml_seperate.py 产出的长表 predictions
-  列: [sample_id, eval_name, model, y_true, p_success, cost, ...]
+职责: 在全局预算硬约束下, 最大化期望成功数 (MILP 指派)。
+输入: predictions 长表 [sample_id, model, y_true, p_success, cost]
+输出: 路由 assignment, 真实成功率 (用 y_true 评估, 非预测自嗨)
 
-核心 MILP (指派型 0-1 规划):
-  变量  x[q, m] ∈ {0, 1}                     query q 是否路由到模型 m
-  约束1 ∀q  Σ_m x[q, m] = 1                  每条 query 恰好选一个模型
-  约束2 Σ_{q,m} cost[q,m] · x[q,m] ≤ Budget  全局预算硬约束
-  目标  max Σ_{q,m} p_success[q,m] · x[q,m]   最大化期望成功数
-
-约束/目标都集中在 solve_routing 里, 注释标了"可改"位置, 方便后续:
-  - 加风险项 (减 λ·方差)
-  - 加每模型容量上限
-  - 改成最小成本 s.t. 成功数下限
-
-evaluate_assignment 用 y_true 回测真实成功率(而非预测), 作为诚实评估。
-baselines 给 always-cheap / always-expensive / random / oracle 对照。
+数据纪律: evaluate_assignment / baselines 一律用 y_true 算真实成功率。
 """
 
 from __future__ import annotations

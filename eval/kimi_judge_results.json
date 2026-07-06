@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "provider": "Kimi",
+    "model": "moonshot-v1-8k",
+    "base_url": "https://api.moonshot.cn/v1"
+  },
+  "metrics": {
+    "n_pairs": 12,
+    "position_flip_rate": 0.083,
+    "accept_rate": 0.917,
+    "accuracy_on_accepted": 1.0
+  },
+  "by_category": {
+    "easy": {
+      "n_pairs": 6,
+      "position_flip_rate": 0.0,
+      "accept_rate": 1.0,
+      "accuracy_on_accepted": 1.0
+    },
+    "hard": {
+      "n_pairs": 6,
+      "position_flip_rate": 0.167,
+      "accept_rate": 0.833,
+      "accuracy_on_accepted": 1.0
+    }
+  },
+  "rows": [
+    {
+      "id": "easy_overfit",
+      "category": "easy",
+      "trap": "",
+      "prompt": "用一句话解释什么是过拟合 overfitting",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "easy_list_tuple",
+      "category": "easy",
+      "trap": "",
+      "prompt": "Python 里 list 和 tuple 最主要的区别是什么",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "easy_auc",
+      "category": "easy",
+      "trap": "",
+      "prompt": "AUC 这个指标衡量的是分类器的什么能力",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "easy_calibration",
+      "category": "easy",
+      "trap": "",
+      "prompt": "为什么要对预测概率做校准 calibration",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "easy_milp",
+      "category": "easy",
+      "trap": "",
+      "prompt": "一句话说明 MILP (混合整数线性规划) 适合解决什么问题",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "easy_leakage",
+      "category": "easy",
+      "trap": "",
+      "prompt": "解释一下什么是数据穿越 data leakage",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_dropout_length",
+      "category": "hard",
+      "trap": "length_bias",
+      "prompt": "用一句话解释 dropout 正则化在做什么",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_routerbench_arena",
+      "category": "hard",
+      "trap": "subtle_error",
+      "prompt": "RouterBench 和 RouterArena 在路由评测里各扮演什么角色",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_ece_brier",
+      "category": "hard",
+      "trap": "subtle_error",
+      "prompt": "ECE 和 Brier score 分别衡量什么, 二者有何不同",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_swap_aggregate",
+      "category": "hard",
+      "trap": "subtle_error",
+      "prompt": "swap-and-aggregate 为什么能减弱 LLM-judge 的位置偏...",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_milp_budget",
+      "category": "hard",
+      "trap": "subtle_error",
+      "prompt": "固定预算 0.002/query 时, MILP 路由相对 always-che...",
+      "verdict_1": "A",
+      "verdict_2": "B",
+      "winner_1": "good",
+      "winner_2": "good",
+      "consistent": true,
+      "accepted_winner": "good"
+    },
+    {
+      "id": "hard_random_baseline_length",
+      "category": "hard",
+      "trap": "length_bias",
+      "prompt": "LLM 路由实验里 random baseline 应如何定义才公平",
+      "verdict_1": "A",
+      "verdict_2": "A",
+      "winner_1": "good",
+      "winner_2": "bad",
+      "consistent": false,
+      "accepted_winner": null
+    }
+  ]
+}

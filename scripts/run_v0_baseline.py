@@ -1,4 +1,8 @@
-"""Run v0 baseline (no TE / no cross) and append to iteration_log.csv."""
+"""Run v0 baseline (no TE / no cross) and append to iteration_log.csv.
+
+输入: config/config.yaml, data/peek.csv
+输出: data/predictions_v0.parquet, data/iteration_log.csv 一行
+"""
 
 from __future__ import annotations
 
@@ -14,7 +18,7 @@ sys.path.insert(0, str(ROOT))
 from model import milp as mp  # noqa: E402
 from model import ml_seperate as ml  # noqa: E402
 
-ITER_LOG = ROOT / "docs" / "iteration_log.csv"
+ITER_LOG = ROOT / "data" / "iteration_log.csv"
 
 
 def feature_note(cfg: dict) -> str:
