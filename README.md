@@ -77,7 +77,7 @@ flowchart TB
 左：可靠性图（校准前橙线 vs 校准后蓝线）；右：四候选模型 accuracy / AUC / 1−ECE。
 
 <p align="center">
-  <img src="images/calibration.png" alt="校准前后可靠性图" width="780" />
+  <img src="https://github.com/pengsihan867-lang/RouteAlpha/raw/main/images/calibration.png" alt="校准前后可靠性图" width="780" />
 </p>
 
 ### 阶段二 · Pareto 迭代进步
@@ -85,7 +85,7 @@ flowchart TB
 固定预算 @0.001/query，v1→v2→v3 在相同成本下成功率从 **0.762 → 0.777** 逼近 oracle。
 
 <p align="center">
-  <img src="images/pareto_iteration.png" alt="Pareto 迭代进步图" width="520" />
+  <img src="https://github.com/pengsihan867-lang/RouteAlpha/raw/main/images/pareto_iteration.png" alt="Pareto 迭代进步图" width="520" />
 </p>
 
 | 版本 | 特征 | MILP SR@0.001 | gap |
@@ -97,7 +97,7 @@ flowchart TB
 ### 失败样本归因
 
 <p align="center">
-  <img src="images/failure_attribution.png" alt="失败样本归因分布" width="520" />
+  <img src="https://github.com/pengsihan867-lang/RouteAlpha/raw/main/images/failure_attribution.png" alt="失败样本归因分布" width="520" />
 </p>
 
 ### LLM-as-Judge（Kimi moonshot-v1-8k）
