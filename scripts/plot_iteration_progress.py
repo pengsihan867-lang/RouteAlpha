@@ -20,6 +20,7 @@ sys.path.insert(0, str(ROOT))
 
 from model import milp as mp  # noqa: E402
 from model import ml_seperate as ml  # noqa: E402
+from scripts.plot_utils import setup_chinese_font  # noqa: E402
 
 DEMO_BUDGET = 0.001
 OUT = ROOT / "images" / "pareto_iteration.png"
@@ -29,18 +30,6 @@ VERSIONS = [
     ("v2", "v2_TE_only", ROOT / "data" / "predictions_v2.parquet", "#6baed6"),
     ("v3", "v3_TE+cross+mglobal", ROOT / "data" / "predictions.parquet", "#08519c"),
 ]
-
-
-def setup_chinese_font() -> None:
-    plt.rcParams["font.sans-serif"] = [
-        "PingFang SC",
-        "Heiti SC",
-        "STHeiti",
-        "Arial Unicode MS",
-        "SimHei",
-        "DejaVu Sans",
-    ]
-    plt.rcParams["axes.unicode_minus"] = False
 
 
 def cpq(result, q: int) -> tuple[float, float]:

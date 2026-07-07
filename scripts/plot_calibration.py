@@ -11,25 +11,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib import font_manager
 from sklearn.calibration import calibration_curve
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from model import ml_seperate as ml  # noqa: E402
+from scripts.plot_utils import setup_chinese_font  # noqa: E402
 
 OUT = ROOT / "images" / "calibration.png"
-
-
-def setup_chinese_font() -> None:
-    candidates = ["PingFang SC", "Heiti SC", "STHeiti", "Arial Unicode MS", "SimHei", "Microsoft YaHei"]
-    available = {f.name for f in font_manager.fontManager.ttflist}
-    for name in candidates:
-        if name in available:
-            plt.rcParams["font.sans-serif"] = [name, "DejaVu Sans"]
-            break
-    plt.rcParams["axes.unicode_minus"] = False
 
 
 def overall_ece(y_true: np.ndarray, p: np.ndarray, n_bins: int = 10) -> float:

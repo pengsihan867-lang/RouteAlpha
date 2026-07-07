@@ -30,6 +30,11 @@ sys.path.insert(0, str(ROOT))
 
 from model import milp as mp  # noqa: E402
 
+try:
+    from scripts.plot_utils import setup_chinese_font
+except ImportError:
+    from plot_utils import setup_chinese_font  # type: ignore[no-redef]
+
 
 def _oracle_choice(mats: mp.RoutingMatrices) -> np.ndarray:
     choice = np.empty(len(mats.queries), dtype=int)
@@ -146,12 +151,17 @@ def analyze_routing_failures(
     return badcase.head(max_rows), summary, metrics
 
 
-def plot_failure_summary(summary: pd.DataFrame, ax=None):
-    """归因计数条形图。"""
+def plot_failure_summary(summary: pd.DataFrame, ax=None, use_chinese: bool | None = None):
+    """归因计数条形图。use_chinese=None 时自动检测系统字体。"""
+    if use_chinese is None:
+        use_chinese = setup_chinese_font() is not None
+    elif use_chinese:
+        setup_chinese_font()
+
     if ax is None:
         _, ax = plt.subplots(figsize=(6, 3.5))
     if summary.empty:
-        ax.set_title("无失败样本")
+        ax.set_title("无失败样本" if use_chinese else "No failures")
         return ax
     order = ["prediction_error", "calibration_error", "budget_binding", "task_hard", "label_noise"]
     colors = {
@@ -161,20 +171,28 @@ def plot_failure_summary(summary: pd.DataFrame, ax=None):
         "task_hard": "#9e9e9e",
         "label_noise": "#b279a2",
     }
-    labels = {
+    labels_zh = {
         "prediction_error": "预测排序错",
         "calibration_error": "校准/概率误导",
         "budget_binding": "预算太紧",
         "task_hard": "任务本身难",
         "label_noise": "边界/存疑",
     }
+    labels_en = {
+        "prediction_error": "Pred rank err",
+        "calibration_error": "Calib / prob",
+        "budget_binding": "Budget tight",
+        "task_hard": "Task hard",
+        "label_noise": "Borderline",
+    }
+    labels = labels_zh if use_chinese else labels_en
     s = summary.set_index("failure_tag").reindex(order).fillna(0)
     x = np.arange(len(order))
     ax.bar(x, s["count"], color=[colors.get(k, "#ccc") for k in order])
     ax.set_xticks(x)
     ax.set_xticklabels([labels.get(k, k) for k in order], rotation=15, ha="right")
-    ax.set_ylabel("失败条数")
-    ax.set_title("MILP 失败样本归因分布")
+    ax.set_ylabel("失败条数" if use_chinese else "Failures")
+    ax.set_title("MILP 失败样本归因分布" if use_chinese else "MILP Failure Attribution")
     for xi, v in zip(x, s["count"]):
         if v > 0:
             ax.text(xi, v + 0.5, str(int(v)), ha="center", fontsize=8)
@@ -220,8 +238,12 @@ def main() -> None:
     print("\n归因计数:\n", summary.to_string(index=False))
     print("\nBadcase 样例:\n", badcase.head(10).to_string(index=False))
 
+    font = setup_chinese_font()
+    if font:
+        print(f"matplotlib 中文字体: {font}")
+
     fig, ax = plt.subplots(figsize=(6.5, 3.8))
-    plot_failure_summary(summary, ax=ax)
+    plot_failure_summary(summary, ax=ax, use_chinese=font is not None)
     fig.tight_layout()
     out_png = ROOT / "images" / "failure_attribution.png"
     out_png.parent.mkdir(parents=True, exist_ok=True)
