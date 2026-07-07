@@ -17,8 +17,6 @@
 
 > 我带着**量化交易的回测纪律**做 LLM 评测与路由：out-of-fold 无穿越回测、概率校准（ECE）、诚实 baseline、失败归因；再用 MILP 在预算下最大化成功数。
 
-**目标岗位**：大模型评测 / 模型策略（predict-then-optimize）
-
 ---
 
 ## 架构
